@@ -69,6 +69,7 @@ def result_plots(plot_opts: dict,
         ax.set_aspect("equal", "datalim")
         plt.xlabel("east in m")
         plt.ylabel("north in m")
+        plt.savefig('optimal_trajectory.pdf')
         plt.show()
 
     if plot_opts["raceline_curv"]:
