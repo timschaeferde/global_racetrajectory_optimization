@@ -72,7 +72,7 @@ mintime_opts = {"tpadata": None,
                 "warm_start": False,
                 "var_friction": None,
                 "reopt_mintime_solution": False,
-                "recalc_vel_profile_by_tph": False}
+                "recalc_vel_profile_by_tph": True}
 
 # lap time calculation table -------------------------------------------------------------------------------------------
 lap_time_mat_opts = {"use_lap_time_mat": False,             # calculate a lap time matrix (diff. top speeds and scales)
