@@ -391,6 +391,17 @@ psi_vel_opt, kappa_opt = tph.calc_head_curv_an.\
 # CALCULATE VELOCITY AND ACCELERATION PROFILE --------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------
 
+standart_vx = False
+
+if standart_vx:
+    file_paths["ggv_file"] = os.path.join(file_paths["module"], "inputs", "veh_dyn_info", pars["ggv_file"])
+    file_paths["ax_max_machines_file"] = os.path.join(file_paths["module"], "inputs", "veh_dyn_info",
+                                                      pars["ax_max_machines_file"])
+    # import ggv and ax_max_machines (if required)
+    ggv, ax_max_machines = tph.import_veh_dyn_info.\
+        import_veh_dyn_info(ggv_import_path=file_paths["ggv_file"],
+                            ax_max_machines_import_path=file_paths["ax_max_machines_file"])
+
 if opt_type == 'mintime' and not mintime_opts["recalc_vel_profile_by_tph"]:
     # interpolation
     s_splines = np.cumsum(spline_lengths_opt)
