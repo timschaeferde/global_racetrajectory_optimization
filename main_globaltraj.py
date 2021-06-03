@@ -57,7 +57,7 @@ imp_opts = {"flip_imp_track": False,                # flip imported track to rev
 # 'mincurv'             minimum curvature optimization without iterative call
 # 'mincurv_iqp'         minimum curvature optimization with iterative call
 # 'mintime'             time-optimal trajectory optimization
-opt_type = 'mintime'
+opt_type = 'mincurv_iqp'
 
 # set mintime specific options (mintime only) --------------------------------------------------------------------------
 # tpadata:                      set individual friction map data file if desired (e.g. for varmue maps), else set None,
@@ -72,7 +72,7 @@ mintime_opts = {"tpadata": None,
                 "warm_start": False,
                 "var_friction": None,
                 "reopt_mintime_solution": False,
-                "recalc_vel_profile_by_tph": True}
+                "recalc_vel_profile_by_tph": False}
 
 # lap time calculation table -------------------------------------------------------------------------------------------
 lap_time_mat_opts = {"use_lap_time_mat": False,             # calculate a lap time matrix (diff. top speeds and scales)
@@ -398,23 +398,28 @@ if opt_type == 'mintime' and not mintime_opts["recalc_vel_profile_by_tph"]:
     vx_profile_opt = np.interp(s_points_opt_interp, s_splines[:-1], v_opt)
 
 else:
+    kappa_opt = np.append(kappa_opt, [0])
     vx_profile_opt = tph.calc_vel_profile.\
         calc_vel_profile(ggv=ggv,
                          ax_max_machines=ax_max_machines,
                          v_max=pars["veh_params"]["v_max"],
                          kappa=kappa_opt,
                          el_lengths=el_lengths_opt_interp,
-                         closed=True,
+                         closed=False,
+                         v_start=20,
+                         v_end=19,
                          filt_window=pars["vel_calc_opts"]["vel_profile_conv_filt_window"],
                          dyn_model_exp=pars["vel_calc_opts"]["dyn_model_exp"],
                          drag_coeff=pars["veh_params"]["dragcoeff"],
                          m_veh=pars["veh_params"]["mass"])
 
 # calculate longitudinal acceleration profile
-vx_profile_opt_cl = np.append(vx_profile_opt, vx_profile_opt[0])
-ax_profile_opt = tph.calc_ax_profile.calc_ax_profile(vx_profile=vx_profile_opt_cl,
+
+ax_profile_opt = tph.calc_ax_profile.calc_ax_profile(vx_profile=vx_profile_opt,
                                                      el_lengths=el_lengths_opt_interp,
                                                      eq_length_output=False)
+
+vx_profile_opt = vx_profile_opt[:-1]
 
 # calculate laptime
 t_profile_cl = tph.calc_t_profile.calc_t_profile(vx_profile=vx_profile_opt,
@@ -504,7 +509,7 @@ if lap_time_mat_opts["use_lap_time_mat"]:
 trajectory_opt = np.column_stack((s_points_opt_interp,
                                   raceline_interp,
                                   psi_vel_opt,
-                                  kappa_opt,
+                                  kappa_opt[:-1],
                                   vx_profile_opt,
                                   ax_profile_opt))
 spline_data_opt = np.column_stack((spline_lengths_opt, coeffs_x_opt, coeffs_y_opt))
