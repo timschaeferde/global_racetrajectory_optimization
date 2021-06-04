@@ -402,7 +402,7 @@ if standart_vx:
         import_veh_dyn_info(ggv_import_path=file_paths["ggv_file"],
                             ax_max_machines_import_path=file_paths["ax_max_machines_file"])
 
-if opt_type == 'mintime' and not mintime_opts["recalc_vel_profile_by_tph"]:
+if opt_type == 'mintime' and not mintime_opts["recalc_vel_profile_by_tph"] and not standart_vx:
     # interpolation
     s_splines = np.cumsum(spline_lengths_opt)
     s_splines = np.insert(s_splines, 0, 0.0)
@@ -423,14 +423,26 @@ else:
                          dyn_model_exp=pars["vel_calc_opts"]["dyn_model_exp"],
                          drag_coeff=pars["veh_params"]["dragcoeff"],
                          m_veh=pars["veh_params"]["mass"])
+    kappa_opt = kappa_opt[:-1]
+    vx_profile_opt = vx_profile_opt[:-1]
+# else:
+#     vx_profile_opt = tph.calc_vel_profile.\
+#         calc_vel_profile(ggv=ggv,
+#                          ax_max_machines=ax_max_machines,
+#                          v_max=pars["veh_params"]["v_max"],
+#                          kappa=kappa_opt,
+#                          el_lengths=el_lengths_opt_interp,
+#                          closed=True,
+#                          filt_window=pars["vel_calc_opts"]["vel_profile_conv_filt_window"],
+#                          dyn_model_exp=pars["vel_calc_opts"]["dyn_model_exp"],
+#                          drag_coeff=pars["veh_params"]["dragcoeff"],
+#                          m_veh=pars["veh_params"]["mass"])
 
 # calculate longitudinal acceleration profile
-
-ax_profile_opt = tph.calc_ax_profile.calc_ax_profile(vx_profile=vx_profile_opt,
+vx_profile_opt_cl = np.append(vx_profile_opt, vx_profile_opt[-1])
+ax_profile_opt = tph.calc_ax_profile.calc_ax_profile(vx_profile=vx_profile_opt_cl,
                                                      el_lengths=el_lengths_opt_interp,
                                                      eq_length_output=False)
-
-vx_profile_opt = vx_profile_opt[:-1]
 
 # calculate laptime
 t_profile_cl = tph.calc_t_profile.calc_t_profile(vx_profile=vx_profile_opt,
@@ -520,7 +532,7 @@ if lap_time_mat_opts["use_lap_time_mat"]:
 trajectory_opt = np.column_stack((s_points_opt_interp,
                                   raceline_interp,
                                   psi_vel_opt,
-                                  kappa_opt[:-1],
+                                  kappa_opt,
                                   vx_profile_opt,
                                   ax_profile_opt))
 spline_data_opt = np.column_stack((spline_lengths_opt, coeffs_x_opt, coeffs_y_opt))
